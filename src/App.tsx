@@ -1,9 +1,63 @@
-import { useState } from 'react'
+import { ReactElement, useState } from 'react'
 import { Cell, Pie, PieChart } from 'recharts';
 import './App.css'
 
-function App() {
-  const [count, setCount] = useState(0)
+
+const App = () => {
+  /** 定数 */
+  const chart_height = 400;
+  const chart_width = chart_height * 1.2;
+  const chart_radius = chart_height * 0.4;
+
+  // チャートに割り振るシード値
+  const [chartSeed, setChartSeed] = useState(1);
+  let reLoadChart = function () {
+    // チャートのシード値を更新することで、再読み込みする
+    setChartSeed(Math.random());
+  }
+
+  /** 円グラフに登録するデータ */
+  let chartData: (string | number)[][] = [
+    ["name", "value", "color"],
+    ["データ１", 11, "#0088FE"],
+    ["データ２", 2, "#00C49F"],
+    ["データ３", 2, "#FFBB28"],
+    ["データ４", 2, "#FF8042"],
+    ["データ５", 7, "#afeeee"],
+  ];
+
+  /** data の 要素の編集テキストボックス */
+  const Editors = () => {
+
+    // 各要素のエディタを追加
+    const Inputs = () => {
+
+      const listB: Array<ReactElement> = [];
+      for (let i = 1; i < chartData.length; i++) {
+        let data1 = chartData[i];
+        listB.push(<>
+          <li key={i}>
+            <input type='text' onChange={reLoadChart} value={data1[0]} />を
+            <input type='number' className="timeInput" onChange={reLoadChart} value={data1[1]} />時間
+            色：<input type='text' onChange={reLoadChart} value={data1[2]} />
+          </li>
+        </>
+        )
+      }
+      return (
+        <>
+          {listB}
+        </>
+      )
+    }
+    return (<>
+      <ul>
+        <Inputs />
+      </ul>
+    </>)
+  }
+
+
 
   /** 円グラフに登録するデータ */
   let data = [
@@ -41,21 +95,34 @@ function App() {
   return (
     <>
       <div>
-        <PieChart width={700} height={700} className='margin10px'>
-          <Pie data={data} dataKey="value" cx="50%" cy="50%" outerRadius={200} fill="#82ca9d" label={label} > {
-            data.map((entry, index) =>
-              (<Cell key={`cell-${index}`} fill={COLORS[index]} />)
-            )
-          } </Pie>
-        </PieChart>
-      </div>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
+        <div className="editor">
+          <Editors />
+        </div>
+        <div className="chart">
+          <PieChart width={chart_width} height={chart_height} className='margin10px'>
+            <Pie data={data} dataKey="value" cx="50%" cy="50%" outerRadius={chart_radius} fill="#82ca9d" label={label} > {
+              data.map((entry, index) =>
+                (<Cell key={`cell-${index}`} fill={COLORS[index]} />)
+              )
+            } </Pie>
+          </PieChart>
+        </div>
       </div>
     </>
   )
+}
+
+/**
+ * 引数「val」が数値であることをチェック
+ * @param val チェック対象の値
+ * @returns 変換後の数値
+ */
+function checkNumber(val: any): number {
+  let number = Number(val);
+  if (0 < number) {
+    return number;
+  }
+  return 0;
 }
 
 export default App
